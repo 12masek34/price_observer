@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     postgres_user: str
     postgres_password: str
     postgres_port: int
+    bot_token: str
 
     def database_url(self) -> str:
         return (
