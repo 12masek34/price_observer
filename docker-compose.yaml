@@ -1,0 +1,38 @@
+services:
+  price_observer:
+    build: .
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    networks:
+      - game-network
+    depends_on:
+      - price_observer_postgres
+    restart: unless-stopped
+
+  price_observer_postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - game-network
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    command: postgres -c 'timezone=Europe/Moscow'
+    restart: unless-stopped
+
+networks:
+  game-network:
+    driver: bridge
+
+volumes:
+  pgdata:
