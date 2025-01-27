@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 
 from app.database.models.subscription import Subscription
+from app.database.models.product import Product
 
 
 engine = create_async_engine(settings.database_url())
