@@ -1,5 +1,7 @@
 services:
   price_observer:
+    tty: true
+    stdin_open: true
     build: .
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
