@@ -25,13 +25,13 @@ class OzonSubsciberService(BaseSubscriberService):
 
     async def subscribe(self) -> Subscription:
         product_data = await self.parser.parse()
-        # product = await self.product_repository.create(product_data.name, product_data.price)
-        # subscription = await self.subscribe_repository.create(
-        #     self.get_user_id(),
-        #     self.get_chat_id(),
-        #     product.id,
-        #     self.get_user_name(),
-        #     self.get_url(),
-        # )
-        import pdb; pdb.set_trace();
+        product = await self.product_repository.create(product_data.name, product_data.price)
+        subscription = await self.subscribe_repository.create(
+            self.get_user_id(),
+            self.get_chat_id(),
+            product.id,
+            self.get_user_name(),
+            self.get_url(),
+        )
+
         return subscription

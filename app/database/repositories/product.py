@@ -24,5 +24,6 @@ class ProductRepository:
         )
         self.session.add(product)
         await self.session.commit()
+        await self.session.refresh(product)
 
         return product

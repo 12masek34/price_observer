@@ -23,4 +23,5 @@ async def ozon(message: types.Message, session: AsyncSession) -> None:
     log_info(message, "OZON")
     ozon_subsciber = OzonSubsciberService(message, session)
     subscription = await ozon_subsciber.subscribe()
-    await message.answer(f"Подписался")
+
+    await message.answer(f"Подписался на \n\n {subscription.product.name}\n\nЦена {subscription.product.price}₽")

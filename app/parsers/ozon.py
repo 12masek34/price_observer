@@ -1,4 +1,8 @@
 import re
+from collections import (
+    namedtuple,
+)
+
 from DrissionPage import (
     Chromium,
     ChromiumOptions,
@@ -7,9 +11,8 @@ from pyvirtualdisplay import (
     Display,
 )
 
-from app.config.settings import (
-    log,
-)
+
+ProductData = namedtuple("Product", ("name", "price"))
 
 
 class OzonParser:
@@ -21,13 +24,14 @@ class OzonParser:
         self.url = url
         self.tab = None
 
-    async def parse(self):
+    async def parse(self) -> ProductData:
         self.display.start()
         self.init_tab()
         name = self.get_name()
         price = self.get_price()
-        import pdb; pdb.set_trace();
         self.display.stop()
+
+        return ProductData(name=name, price=price)
 
     def init_tab(self) -> None:
 

@@ -23,5 +23,6 @@ class SubscriptionRepository:
         )
         self.session.add(subscription)
         await self.session.commit()
+        await self.session.refresh(subscription, ["product"])
 
         return subscription
