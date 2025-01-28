@@ -28,7 +28,7 @@ services:
     networks:
       - game-network
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - ${POSTGRES_PORT}:5432
     command: postgres -c 'timezone=Europe/Moscow'
     restart: unless-stopped
 
