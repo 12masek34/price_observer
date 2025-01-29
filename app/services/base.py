@@ -10,6 +10,9 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from app.config.settings import (
+    DELETE_SUBSCRIPTION_PREFIX,
+)
 from app.database.models.subscription import (
     Subscription,
 )
@@ -26,7 +29,7 @@ from app.utils.base import (
 
 class BaseSubscriberService:
 
-    def __init__(self, message: types.Message, session: AsyncSession) -> None:
+    def __init__(self, message: types.Message | types.CallbackQuery, session: AsyncSession) -> None:
         self.message = message
         self.subscribe_repository = SubscriptionRepository(session)
         self.product_repository = ProductRepository(session)
@@ -48,6 +51,10 @@ class BaseSubscriberService:
 
     async def get_list_subscriptions(self) -> Sequence[Subscription]:
         return await self.subscribe_repository.get_subscrptions_by_user_id(self.message.from_user.id)
+
+    async def delete_subscription_by_button(self):
+        subscription_id = int(self.message.data.replace(DELETE_SUBSCRIPTION_PREFIX, ""))
+        return await self.subscribe_repository.delete_by_id(subscription_id)
 
     def get_url(self) -> str:
         if not self.message.text:

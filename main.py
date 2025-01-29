@@ -21,6 +21,7 @@ from app.middlewares.database import (
 from app.routers import (
     commands,
     ozon,
+    subscribe
 )
 
 
@@ -30,6 +31,7 @@ async def main():
     bot = Bot(token=settings.bot_token)
     dp.include_router(commands.router)
     dp.include_router(ozon.router)
+    dp.include_router(subscribe.router)
     dp.update.middleware(DatabaseMiddleware(session=session))
     await bot.delete_webhook(drop_pending_updates=True)
     log.info("application running successfully")

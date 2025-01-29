@@ -37,3 +37,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+DELETE_SUBSCRIPTION_PREFIX = "delete_subscription_"

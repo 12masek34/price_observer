@@ -47,3 +47,11 @@ class SubscriptionRepository:
         result = await self.session.scalars(stmt)
 
         return result.all()
+
+    async def delete_by_id(self, subscription_id: int) -> Subscription:
+        subscription = await self.session.get_one(Subscription, subscription_id)
+
+        await self.session.delete(subscription)
+        await self.session.commit()
+
+        return subscription

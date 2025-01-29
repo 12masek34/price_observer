@@ -38,8 +38,18 @@ async def cmd_subscribe(message: types.Message) -> None:
 @router.message(Command("list"))
 async def cmd_list(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
-    subsciber = BaseSubscriberService(message, session)
-    subscriptions = await subsciber.get_list_subscriptions()
+    subsciber_service = BaseSubscriberService(message, session)
+    subscriptions = await subsciber_service.get_list_subscriptions()
     anser_maker = AnserMaker()
     answer = anser_maker.list_subscriptions(subscriptions)
-    await message.answer(answer)
+    await message.answer(**answer)
+
+
+@router.message(Command("delete"))
+async def cmd_delte(message: types.Message, session: AsyncSession) -> None:
+    log_info(message)
+    subsciber_service = BaseSubscriberService(message, session)
+    subscriptions = await subsciber_service.get_list_subscriptions()
+    anser_maker = AnserMaker()
+    answer = anser_maker.list_subscriptions_keyboard(subscriptions)
+    await message.answer(**answer)
