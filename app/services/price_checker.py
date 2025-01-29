@@ -45,6 +45,10 @@ class PriceChecker:
                 parser = fabric_parser(subscription.service_name, subscription.url)
                 product_data = await parser.parse()
                 new_price_history = await self.price_history_repository.create(subscription, product_data.price)
+
+                if not new_price_history:
+                    continue
+
                 min_price = self.get_min_price(subscription)
 
                 await self.notify_user(subscription, new_price_history, min_price)
