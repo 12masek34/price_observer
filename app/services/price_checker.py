@@ -51,7 +51,6 @@ class PriceChecker:
 
                 min_price = self.get_min_price(subscription)
 
-                await self.notify_user(subscription, new_price_history, min_price)
                 if new_price_history.price < min_price:
                     await self.notify_user(subscription, new_price_history, min_price)
 
