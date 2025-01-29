@@ -23,4 +23,9 @@ async def cmd_start(message: types.Message) -> None:
 @router.message(Command("subscribe"))
 async def cmd_subscribe(message: types.Message) -> None:
     log_info(message)
-    await message.answer(f"привет \n тут будет описания всего что я умею")
+    await message.answer("Пришли мне ссылку товара, за которым надо следить.")
+
+
+@router.message(Command("list"))
+async def cmd_list(message: types.Message) -> None:
+    log_info(message)

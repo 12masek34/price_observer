@@ -16,7 +16,7 @@ from app.services.base import (
 )
 
 
-class OzonSubsciberService(BaseSubscriberService):
+class SubscriberService(BaseSubscriberService):
 
     def __init__(self, message: types.Message, session: AsyncSession) -> None:
         super().__init__(message, session)
