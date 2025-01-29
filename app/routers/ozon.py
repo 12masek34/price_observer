@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.services.ozon import (
-    SubscriberService,
+    OzonSubscriberService,
 )
 from app.utils.logging import (
     log_info,
@@ -21,7 +21,7 @@ router = Router()
 @router.message(F.text.lower().contains("https") & F.text.lower().contains("ozon"))
 async def ozon(message: types.Message, session: AsyncSession) -> None:
     log_info(message, "OZON")
-    ozon_subsciber = SubscriberService(message, session)
+    ozon_subsciber = OzonSubscriberService(message, session)
     subscription = await ozon_subsciber.subscribe()
 
     await message.answer(f"Подписался на \n\n {subscription.product.name}\n\nЦена {subscription.product.price}₽")

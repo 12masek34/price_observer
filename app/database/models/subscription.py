@@ -23,3 +23,4 @@ class Subscription(MyBase):
     user_name = Column(String, nullable=True)
     url = Column(String, nullable=False)
     product = relationship("Product", back_populates="subscriptions", lazy="joined")
+    service_name = Column(String, nullable=False)

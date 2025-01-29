@@ -5,7 +5,16 @@ from aiogram import (
 from aiogram.filters import (
     Command,
 )
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+)
 
+from app.services.anser_maker import (
+    AnserMaker,
+)
+from app.services.base import (
+    BaseSubscriberService,
+)
 from app.utils.logging import (
     log_info,
 )
@@ -27,5 +36,10 @@ async def cmd_subscribe(message: types.Message) -> None:
 
 
 @router.message(Command("list"))
-async def cmd_list(message: types.Message) -> None:
+async def cmd_list(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
+    subsciber = BaseSubscriberService(message, session)
+    subscriptions = await subsciber.get_list_subscriptions()
+    anser_maker = AnserMaker()
+    answer = anser_maker.list_subscriptions(subscriptions)
+    await message.answer(answer)

@@ -1,4 +1,7 @@
 import re
+from typing import (
+    Sequence,
+)
 
 from aiogram import (
     types,
@@ -7,6 +10,9 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from app.database.models.subscription import (
+    Subscription,
+)
 from app.database.repositories.product import (
     ProductRepository,
 )
@@ -24,6 +30,24 @@ class BaseSubscriberService:
         self.message = message
         self.subscribe_repository = SubscriptionRepository(session)
         self.product_repository = ProductRepository(session)
+        self.parser = None
+
+    async def subscribe(self) -> Subscription:
+        product_data = await self.parser.parse()
+        product = await self.product_repository.create(product_data.name, product_data.price)
+        subscription = await self.subscribe_repository.create(
+            self.get_user_id(),
+            self.get_chat_id(),
+            product.id,
+            self.get_user_name(),
+            self.get_url(),
+            self.service_name,
+        )
+
+        return subscription
+
+    async def get_list_subscriptions(self) -> Sequence[Subscription]:
+        return await self.subscribe_repository.get_subscrptions_by_user_id(self.message.from_user.id)
 
     def get_url(self) -> str:
         if not self.message.text:
