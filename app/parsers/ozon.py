@@ -42,7 +42,10 @@ class OzonParser:
         co.set_argument("--disable-extensions")
         co.set_argument("--no-first-run --no-service-autorun --password-store=basic")
         co.set_argument("--start-maximized")
-        co.set_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36')
+        co.set_argument(
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+        )
         self.tab = Chromium(co).latest_tab
         self.tab.run_js("""
             Object.defineProperty(navigator, 'webdriver', {get: () => undefined});

@@ -20,4 +20,4 @@ RUN apt-get update && \
 
 ENV PATH="/usr/lib/chromium/:${PATH}"
 
-CMD alembic upgrade head && Xvfb :99 -screen 0 1920x1080x24 & DISPLAY=:0 python main.py
+CMD alembic upgrade head && rm -f /tmp/.X99-lock && Xvfb :99 -screen 0 1920x1080x24 & DISPLAY=:99 python main.py
