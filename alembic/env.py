@@ -9,6 +9,7 @@ from alembic import context
 
 from app.database.models.subscription import Subscription
 from app.database.models.product import Product
+from app.database.models.price_history import PriceHistory
 
 
 engine = create_async_engine(settings.database_url())
