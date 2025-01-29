@@ -27,7 +27,8 @@ class AnserMaker:
         result = []
         for subscription in subscriptions:
             price = subscription.price_history[-1].price if subscription.price_history else subscription.product.price
-            result.append(f"{subscription.service_name}\n{subscription.product.name}\n{price}₽")
+            created_at = subscription.price_history[-1].created_at if subscription.price_history else subscription.product.created_at
+            result.append(f"{subscription.service_name}\n{created_at.strftime('%Y-%m-%d %H:%M')}\n{subscription.product.name}\n{price}₽")
 
         return {
             "text": "\n\n".join(result)
