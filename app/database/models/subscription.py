@@ -24,4 +24,10 @@ class Subscription(MyBase):
     url = Column(String, nullable=False)
     service_name = Column(String, nullable=False)
     product = relationship("Product", back_populates="subscriptions", lazy="joined")
-    price_history = relationship("PriceHistory", back_populates="subscription", lazy="joined")
+    price_history = relationship(
+        "PriceHistory",
+        back_populates="subscription",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

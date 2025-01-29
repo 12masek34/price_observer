@@ -7,22 +7,21 @@ from DrissionPage import (
     Chromium,
     ChromiumOptions,
 )
-from pyvirtualdisplay import (
-    Display,
+
+from app.parsers.base import (
+    BaseParser,
 )
 
 
 ProductData = namedtuple("Product", ("name", "price"))
 
 
-class OzonParser:
+class OzonParser(BaseParser):
     name_product_xpath = ".lt7_27 tsHeadline550Medium"
     price_product_xpath = ".l6s_27 sl4_27"
 
     def __init__(self, url: str) -> None:
-        self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
-        self.url = url
-        self.tab = None
+        super().__init__(url)
 
     async def parse(self) -> ProductData:
         self.display.start()

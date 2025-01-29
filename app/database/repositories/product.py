@@ -9,12 +9,15 @@ from sqlalchemy.ext.asyncio import (
 from app.database.models.product import (
     Product,
 )
+from app.database.repositories.base import (
+    BaseRepository,
+)
 
 
-class ProductRepository:
+class ProductRepository(BaseRepository):
 
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        super().__init__(session)
 
 
     async def create(self, name: str, price: Decimal) -> Product:

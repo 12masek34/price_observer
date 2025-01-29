@@ -5,8 +5,11 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from app.parsers.ozon import (
-    OzonParser,
+from app.config.settings import (
+    OZON,
+)
+from app.parsers.fabric import (
+    fabric_parser,
 )
 from app.services.base import (
     BaseSubscriberService,
@@ -14,8 +17,8 @@ from app.services.base import (
 
 
 class OzonSubscriberService(BaseSubscriberService):
-    service_name = "OZON"
+    service_name = OZON
 
     def __init__(self, message: types.Message, session: AsyncSession) -> None:
         super().__init__(message, session)
-        self.parser = OzonParser(self.get_url())
+        self.parser = fabric_parser(OZON, self.get_url())

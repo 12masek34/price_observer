@@ -26,7 +26,7 @@ router = Router()
 @router.message(Command("start"))
 async def cmd_start(message: types.Message) -> None:
     log_info(message)
-    await message.answer(f"привет \n тут будет описания всего что я умею")
+    await message.answer(f"Я уменю следить за ценами в маркетплейсах:\nOZON\nостальные в разработке...")
 
 
 @router.message(Command("subscribe"))

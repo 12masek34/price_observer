@@ -38,4 +38,6 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+OZON = "OZON"
 DELETE_SUBSCRIPTION_PREFIX = "delete_subscription_"
+DELAY_BY_PRICE_CHECK = 60

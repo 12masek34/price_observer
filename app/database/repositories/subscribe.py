@@ -12,12 +12,15 @@ from sqlalchemy.ext.asyncio import (
 from app.database.models.subscription import (
     Subscription,
 )
+from app.database.repositories.base import (
+    BaseRepository,
+)
 
 
-class SubscriptionRepository:
+class SubscriptionRepository(BaseRepository):
 
     def __init__(self, session: AsyncSession) -> None:
-        self.session = session
+        super().__init__(session)
 
     async def create(
         self,
@@ -41,6 +44,12 @@ class SubscriptionRepository:
         await self.session.refresh(subscription, ["product", "price_history"])
 
         return subscription
+
+    async def get_all_subscrptions(self) -> Sequence[Subscription]:
+        stmt = select(Subscription)
+        result = await self.session.execute(stmt)
+
+        return result.scalars().all()
 
     async def get_subscrptions_by_user_id(self, user_id: int) -> Sequence[Subscription]:
         stmt = select(Subscription).where(Subscription.user_id == user_id)
