@@ -40,7 +40,9 @@ class OzonParser:
         co.set_argument("--no-sandbox")
         co.set_argument("--disable-infobars")
         co.set_argument("--disable-extensions")
-        co.set_argument("--no-first-run --no-service-autorun --password-store=basic")
+        co.set_argument("--no-first-run")
+        co.set_argument("--no-service-autorun")
+        co.set_argument("--password-store=basic")
         co.set_argument("--start-maximized")
         co.set_argument(
             "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
