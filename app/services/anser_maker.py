@@ -24,11 +24,13 @@ class AnserMaker:
         if not subscriptions:
             return self.no_subscriptions()
 
+        result = []
+        for subscription in subscriptions:
+            price = subscription.price_history[-1].price if subscription.price_history else subscription.product.price
+            result.append(f"{subscription.service_name}\n{subscription.product.name}\n{price}₽")
+
         return {
-            "text": "\n\n".join(
-                f"{subscription.service_name}\n{subscription.product.name}\n{subscription.product.price}₽"
-                for subscription in subscriptions
-            )
+            "text": "\n\n".join(result)
         }
 
     def list_subscriptions_keyboard(self, subscriptions: Sequence[Subscription]) -> dict:

@@ -25,14 +25,14 @@ class OzonParser(BaseParser):
 
     async def parse(self) -> ProductData:
         self.display.start()
-        self.init_tab()
+        await self.init_tab()
         name = self.get_name()
         price = self.get_price()
         self.display.stop()
 
         return ProductData(name=name, price=price)
 
-    def init_tab(self) -> None:
+    async def init_tab(self) -> None:
 
         co = ChromiumOptions()
         co.headless(False)
