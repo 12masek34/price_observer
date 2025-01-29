@@ -27,6 +27,9 @@ class Subscription(MyBase):
         "Product",
         back_populates="subscriptions",
         lazy="joined",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        passive_deletes=True,
     )
     price_history = relationship(
         "PriceHistory",

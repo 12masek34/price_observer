@@ -26,4 +26,7 @@ class Product(MyBase):
     name = Column(String, nullable=False)
     price = Column(Numeric(precision=10, scale=2), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
-    subscriptions = relationship("Subscription", back_populates="product")
+    subscriptions = relationship(
+        "Subscription",
+        back_populates="product",
+    )
