@@ -68,8 +68,9 @@ class OzonParser(BaseParser):
             text = tags[0].text
 
             if pattern:
-                if match := re.search(pattern, text):
-                    text = match.group()
+                if match := re.findall(pattern, text):
+                    if match:
+                        text = "".join(match)
 
             return text
 
