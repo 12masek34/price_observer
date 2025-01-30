@@ -35,8 +35,12 @@ class BaseSubscriberService:
         self.product_repository = ProductRepository(session)
         self.parser = None
 
-    async def subscribe(self) -> Subscription:
+    async def subscribe(self) -> Subscription | None:
         product_data = await self.parser.parse()
+
+        if not product_data:
+            return
+
         product = await self.product_repository.create(product_data.name, product_data.price)
         subscription = await self.subscribe_repository.create(
             self.get_user_id(),

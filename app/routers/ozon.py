@@ -10,6 +10,9 @@ from sqlalchemy.ext.asyncio import (
 from app.config.settings import (
     OZON,
 )
+from app.services.anser_maker import (
+    AnserMaker,
+)
 from app.services.ozon import (
     OzonSubscriberService,
 )
@@ -26,5 +29,9 @@ async def ozon(message: types.Message, session: AsyncSession) -> None:
     log_info(message, OZON)
     ozon_subsciber = OzonSubscriberService(message, session)
     subscription = await ozon_subsciber.subscribe()
+    anser_maker = AnserMaker()
 
-    await message.answer(f"Подписался на \n\n {subscription.product.name}\n\nЦена {subscription.product.price}₽")
+    if not subscription:
+        await message.answer(anser_maker.error_subscribe())
+    else:
+        await message.answer(anser_maker.success_subscribe(subscription))

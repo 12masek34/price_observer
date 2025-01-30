@@ -39,5 +39,8 @@ class Settings(BaseSettings):
 settings = Settings()
 
 OZON = "OZON"
+WILDBERRIES = "WILDBERRIES"
 DELETE_SUBSCRIPTION_PREFIX = "delete_subscription_"
 DELAY_BY_PRICE_CHECK = 600
+PARSE_RETRIES = 3
+PARSE_TIMEOUT = 5

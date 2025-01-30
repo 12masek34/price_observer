@@ -53,3 +53,13 @@ class AnserMaker:
             "text": "Какую удалить:",
             "reply_markup": keyboard,
         }
+
+
+    def success_subscribe(self, subscription: Subscription) -> str:
+        return (
+            f"Подписался на\n\n{subscription.service_name}\n\n"
+            f"{subscription.product.name}\n\nЦена {subscription.product.price}₽"
+        )
+
+    def error_subscribe(self) -> str:
+        return "Чет не получилось подписаться, попробуй позже"

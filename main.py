@@ -22,6 +22,7 @@ from app.routers import (
     commands,
     ozon,
     subscribe,
+    wildberries,
 )
 from app.services.price_checker import (
     PriceChecker,
@@ -36,6 +37,7 @@ async def main():
     dp.include_router(commands.router)
     dp.include_router(ozon.router)
     dp.include_router(subscribe.router)
+    dp.include_router(wildberries.router)
     dp.update.middleware(DatabaseMiddleware(session=session))
     await bot.delete_webhook(drop_pending_updates=True)
     log.info("application running successfully")

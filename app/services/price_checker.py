@@ -73,6 +73,7 @@ class PriceChecker:
     ) -> None:
         await self.bot.send_message(
             subscription.chat_id,
+            f"{subscription.service_name}\n"
             f"📉 Цена на {subscription.product.name} снизилась!\n"
             f"Было: {min_price}₽ → Стало: {new_price_history.price}₽",
         )
