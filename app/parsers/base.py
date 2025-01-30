@@ -92,18 +92,18 @@ class BaseParser:
         for xpath in xpaths:
             for _ in range(self.retries):
                 try:
-                    tags = self.tab.eles(xpath, timeout=self.timeout)
+                    tag = self.tab.ele(xpath, timeout=self.timeout)
                 except Exception:
                     log.error(f"Ошибка при парсинге html")
                     self.connect()
                     continue
 
-                if not tags:
+                if not tag:
                     self.connect()
                     continue
 
-                if tags:
-                    text = tags[0].text
+                if tag:
+                    text = tag.text
 
                     if pattern:
                         if match := re.findall(pattern, text):
