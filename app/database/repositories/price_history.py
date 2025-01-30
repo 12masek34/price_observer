@@ -2,6 +2,9 @@ from decimal import (
     Decimal,
 )
 
+from sqlalchemy.exc import (
+    IntegrityError,
+)
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
@@ -36,7 +39,11 @@ class PriceHistoryRepository(BaseRepository):
             return
 
         self.session.add(price_history)
-        await self.session.commit()
+        try:
+            await self.session.commit()
+        except IntegrityError as e:
+            log.error(e)
+            return
         await self.session.refresh(price_history)
 
         return price_history

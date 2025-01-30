@@ -1,4 +1,8 @@
+import asyncio
 import re
+from concurrent.futures import (
+    ProcessPoolExecutor,
+)
 from typing import (
     Sequence,
 )
@@ -34,9 +38,15 @@ class BaseSubscriberService:
         self.subscribe_repository = SubscriptionRepository(session)
         self.product_repository = ProductRepository(session)
         self.parser = None
+        self.process_pool = ProcessPoolExecutor()
+
+    @staticmethod
+    def parse_sync(parser):
+        return asyncio.run(parser.parse())
 
     async def subscribe(self) -> Subscription | None:
-        product_data = await self.parser.parse()
+        loop = asyncio.get_running_loop()
+        product_data = await loop.run_in_executor(self.process_pool, self.parse_sync, self.parser)
 
         if not product_data:
             return

@@ -1,6 +1,6 @@
 import re
-from collections import (
-    namedtuple,
+from dataclasses import (
+    dataclass,
 )
 
 from DrissionPage import (
@@ -14,11 +14,14 @@ from pyvirtualdisplay import (
 from app.config.settings import (
     PARSE_RETRIES,
     PARSE_TIMEOUT,
+    log,
 )
-from app.config.settings import log
 
 
-ProductData = namedtuple("Product", ("name", "price"))
+@dataclass(frozen=True)
+class ProductData:
+    name: str
+    price: float
 
 
 class BaseParser:
