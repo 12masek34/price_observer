@@ -1,5 +1,7 @@
 import asyncio
-from decimal import Decimal
+from decimal import (
+    Decimal,
+)
 from typing import (
     Sequence,
 )
@@ -14,8 +16,11 @@ from sqlalchemy.ext.asyncio import (
 
 from app.config.settings import (
     DELAY_BY_PRICE_CHECK,
+    log,
 )
-from app.database.models.price_history import PriceHistory
+from app.database.models.price_history import (
+    PriceHistory,
+)
 from app.database.models.subscription import (
     Subscription,
 )
@@ -42,8 +47,17 @@ class PriceChecker:
         while True:
             subscriptions = await self.get_subscriptions()
             for subscription in subscriptions:
+                log.info(f"{subscription.id=} {subscription.service_name=} {subscription.product.name=}")
                 parser = fabric_parser(subscription.service_name, subscription.url)
                 product_data = await parser.parse()
+
+                if not product_data:
+                    log.error(
+                        f"Не удалось спарсить {subscription.id=} "
+                        f"{subscription.service_name=} {subscription.product.name=}"
+                    )
+                    continue
+
                 new_price_history = await self.price_history_repository.create(subscription, product_data.price)
 
                 if not new_price_history:

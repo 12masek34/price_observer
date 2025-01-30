@@ -76,7 +76,12 @@ class BaseParser:
 
     def get_elem_by_xpath(self, xpath: str, pattern: str | None = None) -> str:
         for _ in range(self.retries):
-            tags = self.tab.eles(xpath, timeout=self.timeout)
+            try:
+                tags = self.tab.eles(xpath, timeout=self.timeout)
+            except Exception:
+                log.error(f"Ошибка при парсинге html")
+                self.connect()
+                continue
 
             if not tags:
                 self.connect()
