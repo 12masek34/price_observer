@@ -46,7 +46,10 @@ class BaseSubscriberService:
 
     async def subscribe(self) -> Subscription | None:
         loop = asyncio.get_running_loop()
-        product_data = await loop.run_in_executor(self.process_pool, self.parse_sync, self.parser)
+        try:
+            product_data = await loop.run_in_executor(self.process_pool, self.parse_sync, self.parser)
+        except Exception:
+            return
 
         if not product_data:
             return
