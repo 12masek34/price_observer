@@ -33,9 +33,13 @@ class BaseParser:
         self.display.start()
         await self.init_tab()
         name = self.get_name()
+
+        if not name:
+            return
+
         price = self.get_price()
 
-        if not any((name, price)):
+        if not price:
             return
 
         self.display.stop()
@@ -58,44 +62,52 @@ class BaseParser:
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
         )
         self.tab = Chromium(co).latest_tab
-        self.tab.run_js("""
-            Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-            window.navigator.chrome = {runtime: {}};
-            Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
-            Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
-        """)
-        self.tab.run_js("""
-            const mouseEvent = document.createEvent('MouseEvents');
-            mouseEvent.initMouseEvent('mousemove', true, true, window, 1, 0, 0, 10, 10, false, false, false, false, 0, null);
-            document.dispatchEvent(mouseEvent);
-        """)
+        self.run_js()
         self.connect()
+
+    def run_js(self):
+        for _ in range(self.retries):
+            try:
+                self.tab.run_js("""
+                    Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+                    window.navigator.chrome = {runtime: {}};
+                    Object.defineProperty(navigator, 'languages', {get: () => ['ru-RU', 'ru']});
+                    Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
+                    const mouseEvent = document.createEvent('MouseEvents');
+                    mouseEvent.initMouseEvent('mousemove', true, true, window, 1, 0, 0, 10, 10, false, false, false, false, 0, null);
+                    document.dispatchEvent(mouseEvent);
+                """)
+            except Exception:
+                continue
+            else:
+                return
 
     def connect(self) -> None:
         self.tab.get(self.url, retry=self.retries, timeout=self.timeout)
 
-    def get_elem_by_xpath(self, xpath: str, pattern: str | None = None) -> str:
-        for _ in range(self.retries):
-            try:
-                tags = self.tab.eles(xpath, timeout=self.timeout)
-            except Exception:
-                log.error(f"Ошибка при парсинге html")
-                self.connect()
-                continue
+    def get_elem_by_xpath(self, xpaths: str, pattern: str | None = None) -> str:
+        for xpath in xpaths:
+            for _ in range(self.retries):
+                try:
+                    tags = self.tab.eles(xpath, timeout=self.timeout)
+                except Exception:
+                    log.error(f"Ошибка при парсинге html")
+                    self.connect()
+                    continue
 
-            if not tags:
-                self.connect()
-                continue
+                if not tags:
+                    self.connect()
+                    continue
 
-            if tags:
-                text = tags[0].text
+                if tags:
+                    text = tags[0].text
 
-                if pattern:
-                    if match := re.findall(pattern, text):
-                        if match:
-                            text = "".join(match)
+                    if pattern:
+                        if match := re.findall(pattern, text):
+                            if match:
+                                text = "".join(match)
 
-                return text
+                    return text
 
         return ""
 
