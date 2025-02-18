@@ -30,8 +30,12 @@ cd price_observer
 ** 2️⃣ Настройка переменных окружения
 Создайте файл =.env= и укажите:
 #+begin_example
-BOT_TOKEN=your_telegram_bot_token
-DATABASE_URL=postgresql://user:password@db:5432/your_db
+POSTGRES_HOST=
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_PORT=
+BOT_TOKEN=
 #+end_example
 
 ** 3️⃣ Запуск с Docker
