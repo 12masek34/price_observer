@@ -1,5 +1,5 @@
 #+TITLE: Price_observer
-#+AUTHOR: Дмитрий Мартысь
+#+AUTHOR: Dmitriy Martys
 #+DESCRIPTION: Бот для отслеживания цен на маркетплейсах
 
 * 📌 Описание
@@ -41,7 +41,7 @@ docker-compose up --build -d
 
 ** 4️⃣ Применение миграций БД
 #+begin_src bash
-docker exec -it your_container_name alembic upgrade head
+docker exec -it price_observer alembic upgrade head
 #+end_src
 
 * ⚡ Использование
