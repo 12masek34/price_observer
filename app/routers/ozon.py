@@ -28,7 +28,7 @@ router = Router()
 async def ozon(message: types.Message, session: AsyncSession) -> None:
     log_info(message, OZON)
     anser_maker = AnserMaker()
-    await message.answer(anser_maker.in_progress())
+    await message.answer(anser_maker.in_progress(OZON))
     ozon_subsciber = OzonSubscriberService(message, session)
     subscription = await ozon_subsciber.subscribe()
 

@@ -28,7 +28,7 @@ router = Router()
 async def wildberries(message: types.Message, session: AsyncSession) -> None:
     log_info(message, WILDBERRIES)
     anser_maker = AnserMaker()
-    await message.answer(anser_maker.in_progress())
+    await message.answer(anser_maker.in_progress(WILDBERRIES))
     wildberries_subsciber = WildberriesSubscriberService(message, session)
     subscription = await wildberries_subsciber.subscribe()
 
