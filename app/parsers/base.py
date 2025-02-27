@@ -37,7 +37,6 @@ class BaseParser:
         self.timeout = PARSE_TIMEOUT
 
     async def parse(self) -> ProductData | None:
-        log.info(f"{self.__class__.__name__}\n{self.url=}")
         self.display.start()
         await self.init_tab()
         name = self.get_name()
