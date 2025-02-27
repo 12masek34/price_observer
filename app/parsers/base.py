@@ -25,6 +25,10 @@ class ProductData:
 
 
 class BaseParser:
+    name_product_xpath = None
+    price_product_xpath = None
+    price_re = None
+
     def __init__(self, url: str) -> None:
         self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
         self.url = url
@@ -35,6 +39,7 @@ class BaseParser:
     async def parse(self) -> ProductData | None:
         self.display.start()
         await self.init_tab()
+        import pdb; pdb.set_trace();
         name = self.get_name()
 
         if not name:
@@ -103,19 +108,35 @@ class BaseParser:
                     continue
 
                 if tag:
-                    text = tag.text
+                    text = self.clean_text(tag.text)
 
                     if pattern:
                         if match := re.findall(pattern, text):
                             if match:
-                                text = "".join(match)
+                                text = match[0]
 
                     return text
 
         return ""
 
+    def clean_text(self, text: str | None) -> str:
+        if text:
+            result = repr(text).replace(r"\u2009", "").replace(r"\n", "")
+
+            if result and result.startswith("'"):
+                result = result[1:]
+
+            if result and result.endswith("'"):
+                result = result[:-1]
+
+            return result
+
+        else:
+            return ""
+
+
     def get_name(self) -> str:
         return self.get_elem_by_xpath(self.name_product_xpath)
 
     def get_price(self) -> str:
-        return self.get_elem_by_xpath(self.price_product_xpath, r"\d+")
+        return self.get_elem_by_xpath(self.price_product_xpath, self.price_re)
