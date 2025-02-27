@@ -52,7 +52,7 @@ class BaseParser:
 
         self.display.stop()
 
-        return ProductData(name=name, price=price)
+        return ProductData(name=name, price=float(price))
 
     async def init_tab(self) -> bool | None:
 
@@ -139,4 +139,4 @@ class BaseParser:
         return self.get_elem_by_xpath(self.name_product_xpath)
 
     def get_price(self) -> str:
-        return self.get_elem_by_xpath(self.price_product_xpath, self.price_re)
+        return self.get_elem_by_xpath(self.price_product_xpath, self.price_re).replace(" ", "")

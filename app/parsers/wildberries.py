@@ -6,6 +6,7 @@ from app.parsers.base import (
 class WildberriesParser(BaseParser):
     name_product_xpath = [".product-page__title"]
     price_product_xpath = [".price-block__wallet-price red-price", ".price-block__wallet-price"]
+    price_re = r"\d{1,3}(?:\s\d{3})*"
 
 
     def __init__(self, url: str) -> None:
