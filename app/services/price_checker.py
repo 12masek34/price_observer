@@ -58,6 +58,7 @@ class PriceChecker:
                     )
                     continue
 
+                log.info(f"{product_data.name=} {product_data.price}")
                 new_price_history = await self.price_history_repository.create(subscription, product_data.price)
 
                 if not new_price_history:
