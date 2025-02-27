@@ -27,9 +27,10 @@ router = Router()
 @router.message(F.text.lower().contains("https") & F.text.lower().contains("ozon"))
 async def ozon(message: types.Message, session: AsyncSession) -> None:
     log_info(message, OZON)
+    anser_maker = AnserMaker()
+    await message.answer(anser_maker.in_progress())
     ozon_subsciber = OzonSubscriberService(message, session)
     subscription = await ozon_subsciber.subscribe()
-    anser_maker = AnserMaker()
 
     if not subscription:
         await message.answer(anser_maker.error_subscribe())

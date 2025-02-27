@@ -63,3 +63,6 @@ class AnserMaker:
 
     def error_subscribe(self) -> str:
         return "Чет не получилось подписаться, попробуй позже"
+
+    def in_progress(self) -> str:
+        return "Ага, попытаюсь подписаться на это, это может занять какое то время."
