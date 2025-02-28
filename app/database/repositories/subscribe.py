@@ -52,7 +52,7 @@ class SubscriptionRepository(BaseRepository):
         return result.scalars().all()
 
     async def get_subscrptions_by_user_id(self, user_id: int) -> Sequence[Subscription]:
-        stmt = select(Subscription).where(Subscription.user_id == user_id)
+        stmt = select(Subscription).where(Subscription.user_id == user_id).order_by(Subscription.service_name)
         result = await self.session.scalars(stmt)
 
         return result.all()
