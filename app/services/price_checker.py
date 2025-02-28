@@ -1,4 +1,8 @@
 import asyncio
+
+from datetime import (
+    datetime,
+)
 from decimal import (
     Decimal,
 )
@@ -51,14 +55,20 @@ class PriceChecker:
         self.price_history_repository = PriceHistoryRepository(self.session)
         self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
 
-    async def check_by_delay(self):
+    async def check_by_delay(self) -> None:
         self.display.start()
-        try:
-            while True:
-                await self.parse_subscriptions()
-                await asyncio.sleep(DELAY_BY_PRICE_CHECK)
-        finally:
-            self.display.stop()
+        start_time = datetime.now()
+        while True:
+            interval = datetime.now() - start_time
+
+            if interval.total_seconds() > DELAY_BY_PRICE_CHECK:
+                start_time = datetime.now()
+                try:
+                    await self.parse_subscriptions()
+                finally:
+                    self.display.stop()
+
+            await asyncio.sleep(10)
 
     async def parse_subscriptions(self):
         subscriptions = await self.get_subscriptions()
