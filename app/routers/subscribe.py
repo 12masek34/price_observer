@@ -11,7 +11,6 @@ from app.config.settings import (
     DELETE_SUBSCRIPTION_PREFIX,
     HISTORY_SUBSCRIPTION_PREFIX,
 )
-from app.services import answer_maker
 from app.services.answer_maker import (
     answer_maker,
 )
@@ -31,7 +30,6 @@ async def delete_subscription(callback_query: types.CallbackQuery, session: Asyn
     log_info(callback_query)
     subsciber_service = BaseSubscriberService(callback_query, session)
     delete_subscription = await subsciber_service.delete_subscription_by_button()
-    answer_maker = AnserMaker()
     subscriptions = await subsciber_service.get_list_subscriptions()
     answer = answer_maker.list_subscriptions_keyboard(
         [subscription for subscription in subscriptions if subscription.id != delete_subscription.id],

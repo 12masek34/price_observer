@@ -14,7 +14,7 @@ from app.config.settings import (
     HISTORY_SUBSCRIPTION_PREFIX,
 )
 from app.services.answer_maker import (
-    AnserMaker,
+    answer_maker,
 )
 from app.services.base import (
     BaseSubscriberService,
@@ -53,7 +53,6 @@ async def cmd_list(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
     subsciber_service = BaseSubscriberService(message, session)
     subscriptions = await subsciber_service.get_list_subscriptions()
-    answer_maker = AnserMaker()
     answer = answer_maker.list_subscriptions(subscriptions)
     await message.answer(**answer)
 
@@ -63,7 +62,6 @@ async def cmd_history(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
     subsciber_service = BaseSubscriberService(message, session)
     subscriptions = await subsciber_service.get_list_subscriptions()
-    answer_maker = AnserMaker()
     answer = answer_maker.list_subscriptions_keyboard(
         subscriptions,
         HISTORY_SUBSCRIPTION_PREFIX,
@@ -77,7 +75,6 @@ async def cmd_delte(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
     subsciber_service = BaseSubscriberService(message, session)
     subscriptions = await subsciber_service.get_list_subscriptions()
-    answer_maker = AnserMaker()
     answer = answer_maker.list_subscriptions_keyboard(
         subscriptions,
         DELETE_SUBSCRIPTION_PREFIX,
