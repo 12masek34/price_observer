@@ -180,6 +180,6 @@ class PriceChecker:
             f"===========errors count={len(error_subscriptions)} "
             f"{OZON}={len([item for item in error_subscriptions if item.service_name == OZON])} "
             f"{WILDBERRIES}={len([item for item in error_subscriptions if item.service_name == WILDBERRIES])} "
-            f"{YANDEX_MARKET}={len([item for item in error_subscriptions if item.service_name == YANDEX_MARKET])} "
+            f"{YANDEX_MARKET}={len([item for item in error_subscriptions if item.service_name == YANDEX_MARKET])}"
             f"==========="
         )
