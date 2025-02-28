@@ -12,6 +12,10 @@ from sqlalchemy.ext.asyncio import (
 from app.database.models.subscription import (
     Subscription,
 )
+
+from app.database.models.price_history import (
+    PriceHistory,
+)
 from app.database.repositories.base import (
     BaseRepository,
 )
@@ -64,3 +68,6 @@ class SubscriptionRepository(BaseRepository):
         await self.session.commit()
 
         return subscription
+
+    async def get_subscription_by_id(self, subscription_id: int) -> Subscription:
+        return await self.session.get_one(Subscription, subscription_id)

@@ -7,9 +7,6 @@ from aiogram.types import (
     InlineKeyboardMarkup,
 )
 
-from app.config.settings import (
-    DELETE_SUBSCRIPTION_PREFIX,
-)
 from app.database.models.subscription import (
     Subscription,
 )
@@ -34,7 +31,7 @@ class AnserMaker:
             "text": "\n\n".join(result)
         }
 
-    def list_subscriptions_keyboard(self, subscriptions: Sequence[Subscription]) -> dict:
+    def list_subscriptions_keyboard(self, subscriptions: Sequence[Subscription], prefix: str, text: str) -> dict:
         if not subscriptions:
             return self.no_subscriptions()
 
@@ -43,14 +40,14 @@ class AnserMaker:
                 [
                     InlineKeyboardButton(
                         text=f"{subscription.service_name} {subscription.product.name}",
-                        callback_data=f"{DELETE_SUBSCRIPTION_PREFIX}{subscription.id}")
+                        callback_data=f"{prefix}{subscription.id}")
                 ]
                 for subscription in subscriptions
             ]
         )
 
         return {
-            "text": "Какую удалить:",
+            "text": text,
             "reply_markup": keyboard,
         }
 
@@ -66,6 +63,22 @@ class AnserMaker:
 
     def in_progress(self, name: str) -> str:
         return f"Ага {name}, попытаюсь подписаться на это, это может занять какое то время."
+
+    def history_message(self, subscription: Subscription) -> str:
+        result_lines = []
+        previous_price = None
+
+        for item in subscription.price_history:
+            price = item.price
+            date_str = item.created_at.strftime("%Y-%m-%d %H:%M:%S")
+
+            if price != previous_price:
+                result_lines.append(f"{date_str} — 💰 {price} руб.")
+                previous_price = price
+
+        prices = "\n".join(result_lines)
+
+        return f"<b>{subscription.product.name}</b>\n{prices}"
 
 
 answer_maker = AnserMaker()

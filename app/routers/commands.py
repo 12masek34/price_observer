@@ -9,6 +9,10 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from app.config.settings import (
+    DELETE_SUBSCRIPTION_PREFIX,
+    HISTORY_SUBSCRIPTION_PREFIX,
+)
 from app.services.answer_maker import (
     AnserMaker,
 )
@@ -18,7 +22,6 @@ from app.services.base import (
 from app.utils.logging import (
     log_info,
 )
-
 
 router = Router()
 
@@ -55,11 +58,29 @@ async def cmd_list(message: types.Message, session: AsyncSession) -> None:
     await message.answer(**answer)
 
 
+@router.message(Command("history"))
+async def cmd_history(message: types.Message, session: AsyncSession) -> None:
+    log_info(message)
+    subsciber_service = BaseSubscriberService(message, session)
+    subscriptions = await subsciber_service.get_list_subscriptions()
+    answer_maker = AnserMaker()
+    answer = answer_maker.list_subscriptions_keyboard(
+        subscriptions,
+        HISTORY_SUBSCRIPTION_PREFIX,
+        "Какую историю показать:",
+    )
+    await message.answer(**answer)
+
+
 @router.message(Command("delete"))
 async def cmd_delte(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
     subsciber_service = BaseSubscriberService(message, session)
     subscriptions = await subsciber_service.get_list_subscriptions()
     answer_maker = AnserMaker()
-    answer = answer_maker.list_subscriptions_keyboard(subscriptions)
+    answer = answer_maker.list_subscriptions_keyboard(
+        subscriptions,
+        DELETE_SUBSCRIPTION_PREFIX,
+        "Какую удалить:",
+    )
     await message.answer(**answer)

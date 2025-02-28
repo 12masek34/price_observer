@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
 
 from app.config.settings import (
     DELETE_SUBSCRIPTION_PREFIX,
+    HISTORY_SUBSCRIPTION_PREFIX,
     OZON,
     WILDBERRIES,
     YANDEX_MARKET,
@@ -69,6 +70,10 @@ class BaseSubscriberService:
     async def delete_subscription_by_button(self):
         subscription_id = int(self.message.data.replace(DELETE_SUBSCRIPTION_PREFIX, ""))
         return await self.subscribe_repository.delete_by_id(subscription_id)
+
+    async def get_subscription_by_button(self) -> Subscription:
+        subscription_id = int(self.message.data.replace(HISTORY_SUBSCRIPTION_PREFIX, ""))
+        return await self.subscribe_repository.get_subscription_by_id(subscription_id)
 
     def get_url(self) -> str:
         if not self.message.text:
