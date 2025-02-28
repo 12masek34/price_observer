@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 import re
 
 from dataclasses import (
@@ -31,6 +32,7 @@ class BaseParser:
     name_product_xpath = None
     price_product_xpath = None
     price_re = None
+    _semaphore = asyncio.Semaphore(multiprocessing.cpu_count() * 2)
 
     def __init__(self, subscription: Subscription | None = None, url: str | None = None) -> None:
         self.subscription = subscription
@@ -40,7 +42,8 @@ class BaseParser:
         self.timeout = PARSE_TIMEOUT
 
     async def parse_to_thered(self) -> ProductData:
-        return await asyncio.to_thread(self.parse)
+        async with self._semaphore:
+            return await asyncio.to_thread(self.parse)
 
     def parse(self) -> ProductData:
         self.init_tab()

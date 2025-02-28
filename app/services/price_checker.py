@@ -23,6 +23,9 @@ from sqlalchemy.ext.asyncio import (
 
 from app.config.settings import (
     DELAY_BY_PRICE_CHECK,
+    OZON,
+    WILDBERRIES,
+    YANDEX_MARKET,
     log,
 )
 from app.database.models.price_history import (
@@ -63,27 +66,44 @@ class PriceChecker:
 
             if interval.total_seconds() > DELAY_BY_PRICE_CHECK:
                 start_time = datetime.now()
+                subscriptions = await self.get_subscriptions()
+                log.info(f"========start parsing count={len(subscriptions)}==========")
+                tasks = self.make_tasks(subscriptions)
                 try:
-                    await self.parse_subscriptions()
+                    error_subscriptions = await self.parse_subscriptions(tasks)
+
+                    if error_subscriptions:
+                        self.error_log(error_subscriptions)
+                        await asyncio.sleep(30)
+                        tasks = self.make_tasks(error_subscriptions)
+                        error_subscriptions = await self.parse_subscriptions(tasks)
+
+                        if error_subscriptions:
+                            self.error_log(error_subscriptions)
+                            await asyncio.sleep(90)
+                            error_subscriptions = await self.parse_subscriptions(tasks)
+
+                            log.error(
+                                "\n".join(
+                                    [
+                                        f"Не спарсил {subscription.service_name} {subscription.product.name}"
+                                        for subscription in error_subscriptions
+                                    ]
+                                )
+                            )
                 finally:
                     self.display.stop()
+                log.info(f"========end parsing errors count={len(error_subscriptions)}==========")
 
             await asyncio.sleep(10)
 
-    async def parse_subscriptions(self):
-        subscriptions = await self.get_subscriptions()
-        tasks = self.make_tasks(subscriptions)
-
+    async def parse_subscriptions(self, tasks) -> list:
+        error_subscriptions = []
         for task in asyncio.as_completed(tasks):
             product_data = await task
 
             if not product_data.name or not product_data.price:
-                log.error(
-                    f"\nНе удалось спарсить\n"
-                    f"{product_data.subscription.id=}\n"
-                    f"{product_data.subscription.service_name=}\n"
-                    f"{product_data.subscription.product.name=}\n"
-                )
+                error_subscriptions.append(product_data.subscription)
                 continue
 
             log.info(
@@ -107,6 +127,8 @@ class PriceChecker:
 
             if new_price_history.price < min_price:
                 await self.notify_user(product_data.subscription, new_price_history, min_price)
+
+        return error_subscriptions
 
     def make_tasks(self, subscriptions: Sequence[Subscription]) -> list:
         return [
@@ -152,3 +174,12 @@ class PriceChecker:
                 f"{subscription.product.price=}\n"
             )
             await message.answer(answer_maker.success_subscribe(subscription))
+
+    def error_log(self, error_subscriptions: list[Subscription]):
+        log.info(
+            f"===========errors count={len(error_subscriptions)} "
+            f"{OZON}={len([item for item in error_subscriptions if item.service_name == OZON])} "
+            f"{WILDBERRIES}={len([item for item in error_subscriptions if item.service_name == WILDBERRIES])} "
+            f"{YANDEX_MARKET}={len([item for item in error_subscriptions if item.service_name == YANDEX_MARKET])} "
+            f"==========="
+        )
