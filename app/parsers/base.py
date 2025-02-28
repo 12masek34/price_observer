@@ -32,8 +32,9 @@ class BaseParser:
     price_product_xpath = None
     price_re = None
 
-    def __init__(self, subscription) -> None:
+    def __init__(self, subscription: Subscription | None = None, url: str | None = None) -> None:
         self.subscription = subscription
+        self.url = url
         self.tab = None
         self.retries = PARSE_RETRIES
         self.timeout = PARSE_TIMEOUT
@@ -89,7 +90,7 @@ class BaseParser:
         co.set_argument("--disable-features=IsolateOrigins,site-per-process")
         co.set_argument("--disable-session-crashed-bubble")
         co.set_argument("--disable-search-engine-choice-screen")
-        self.tab = Chromium(co).new_tab(url=self.subscription.url)
+        self.tab = Chromium(co).new_tab(url=self.url if self. url else self.subscription.url)
         self.run_js()
 
     def run_js(self) -> None:

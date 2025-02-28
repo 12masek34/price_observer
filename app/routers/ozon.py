@@ -10,11 +10,11 @@ from sqlalchemy.ext.asyncio import (
 from app.config.settings import (
     OZON,
 )
-from app.services.anser_maker import (
-    AnserMaker,
+from app.services.answer_maker import (
+    answer_maker,
 )
-from app.services.ozon import (
-    OzonSubscriberService,
+from app.services.price_checker import (
+    PriceChecker,
 )
 from app.utils.logging import (
     log_info,
@@ -27,12 +27,6 @@ router = Router()
 @router.message(F.text.lower().contains("https") & F.text.lower().contains("ozon"))
 async def ozon(message: types.Message, session: AsyncSession) -> None:
     log_info(message, OZON)
-    anser_maker = AnserMaker()
-    await message.answer(anser_maker.in_progress(OZON))
-    ozon_subsciber = OzonSubscriberService(message, session)
-    subscription = await ozon_subsciber.subscribe()
-
-    if not subscription:
-        await message.answer(anser_maker.error_subscribe())
-    else:
-        await message.answer(anser_maker.success_subscribe(subscription))
+    await message.answer(answer_maker.in_progress(OZON))
+    price_checker = PriceChecker(message.bot, session)
+    await price_checker.create_subscribe(message, session, OZON)

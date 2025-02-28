@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from app.services.anser_maker import (
+from app.services.answer_maker import (
     AnserMaker,
 )
 from app.services.base import (
@@ -40,8 +40,8 @@ async def cmd_list(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
     subsciber_service = BaseSubscriberService(message, session)
     subscriptions = await subsciber_service.get_list_subscriptions()
-    anser_maker = AnserMaker()
-    answer = anser_maker.list_subscriptions(subscriptions)
+    answer_maker = AnserMaker()
+    answer = answer_maker.list_subscriptions(subscriptions)
     await message.answer(**answer)
 
 
@@ -50,6 +50,6 @@ async def cmd_delte(message: types.Message, session: AsyncSession) -> None:
     log_info(message)
     subsciber_service = BaseSubscriberService(message, session)
     subscriptions = await subsciber_service.get_list_subscriptions()
-    anser_maker = AnserMaker()
-    answer = anser_maker.list_subscriptions_keyboard(subscriptions)
+    answer_maker = AnserMaker()
+    answer = answer_maker.list_subscriptions_keyboard(subscriptions)
     await message.answer(**answer)

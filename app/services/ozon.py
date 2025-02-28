@@ -21,4 +21,4 @@ class OzonSubscriberService(BaseSubscriberService):
 
     def __init__(self, message: types.Message, session: AsyncSession) -> None:
         super().__init__(message, session)
-        self.parser = fabric_parser(OZON, self.get_url())
+        self.parser = fabric_parser(OZON, url=self.get_url())

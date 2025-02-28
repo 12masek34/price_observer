@@ -10,29 +10,21 @@ from sqlalchemy.ext.asyncio import (
 from app.config.settings import (
     WILDBERRIES,
 )
-from app.services.anser_maker import (
-    AnserMaker,
+from app.services.answer_maker import (
+    answer_maker,
 )
-from app.services.wildberries import (
-    WildberriesSubscriberService,
+from app.services.price_checker import (
+    PriceChecker,
 )
 from app.utils.logging import (
     log_info,
 )
-
-
 router = Router()
 
 
 @router.message(F.text.lower().contains("https") & F.text.lower().contains("wildberries"))
 async def wildberries(message: types.Message, session: AsyncSession) -> None:
     log_info(message, WILDBERRIES)
-    anser_maker = AnserMaker()
-    await message.answer(anser_maker.in_progress(WILDBERRIES))
-    wildberries_subsciber = WildberriesSubscriberService(message, session)
-    subscription = await wildberries_subsciber.subscribe()
-
-    if not subscription:
-        await message.answer(anser_maker.error_subscribe())
-    else:
-        await message.answer(anser_maker.success_subscribe(subscription))
+    await message.answer(answer_maker.in_progress(WILDBERRIES))
+    price_checker = PriceChecker(message.bot, session)
+    await price_checker.create_subscribe(message, session, WILDBERRIES)

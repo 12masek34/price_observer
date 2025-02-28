@@ -38,7 +38,7 @@ def run_price_checker() -> None:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     bot = Bot(token=settings.bot_token)
-    price_checker = PriceChecker(bot, session)
+    price_checker = PriceChecker(bot, session())
 
     loop.run_until_complete(price_checker.check_by_delay())
 

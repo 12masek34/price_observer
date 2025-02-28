@@ -66,3 +66,6 @@ class AnserMaker:
 
     def in_progress(self, name: str) -> str:
         return f"Ага {name}, попытаюсь подписаться на это, это может занять какое то время."
+
+
+answer_maker = AnserMaker()

@@ -1,10 +1,10 @@
-import asyncio
 import re
 from concurrent.futures import (
     ProcessPoolExecutor,
 )
 from typing import (
     Sequence,
+    Type,
 )
 
 from aiogram import (
@@ -16,6 +16,10 @@ from sqlalchemy.ext.asyncio import (
 
 from app.config.settings import (
     DELETE_SUBSCRIPTION_PREFIX,
+    OZON,
+    WILDBERRIES,
+    YANDEX_MARKET,
+    log,
 )
 from app.database.models.subscription import (
     Subscription,
@@ -40,18 +44,11 @@ class BaseSubscriberService:
         self.parser = None
         self.process_pool = ProcessPoolExecutor()
 
-    @staticmethod
-    def parse_sync(parser):
-        return asyncio.run(parser.parse())
-
     async def subscribe(self) -> Subscription | None:
-        loop = asyncio.get_running_loop()
-        try:
-            product_data = await loop.run_in_executor(self.process_pool, self.parse_sync, self.parser)
-        except Exception:
-            return
+        product_data = await self.parser.parse_to_thered()
 
-        if not product_data:
+        if not product_data.price or not product_data.name:
+            log.error(f"Не удалось спарсить")
             return
 
         product = await self.product_repository.create(product_data.name, product_data.price)
@@ -90,3 +87,17 @@ class BaseSubscriberService:
 
     def get_user_name(self) -> str:
         return rgetattr(self.message, "from_user.username")
+
+
+def fabric_subscriber(service_name: str) -> Type[BaseSubscriberService]:
+    if service_name == OZON:
+        from app.services.ozon import OzonSubscriberService
+        return OzonSubscriberService
+    elif service_name == WILDBERRIES:
+        from app.services.wildberries import WildberriesSubscriberService
+        return WildberriesSubscriberService
+    elif service_name == YANDEX_MARKET:
+        from app.services.yandex_market import YandexMarketSubscriberService
+        return YandexMarketSubscriberService
+    else:
+        raise

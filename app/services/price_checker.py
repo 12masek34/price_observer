@@ -2,18 +2,19 @@ import asyncio
 from decimal import (
     Decimal,
 )
-from string import whitespace
 from typing import (
     Sequence,
 )
 
 from aiogram import (
     Bot,
+    types,
 )
-from pyvirtualdisplay.display import Display
+from pyvirtualdisplay.display import (
+    Display,
+)
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
-    async_sessionmaker,
 )
 
 from app.config.settings import (
@@ -35,13 +36,17 @@ from app.database.repositories.subscribe import (
 from app.parsers.fabric import (
     fabric_parser,
 )
-
-
+from app.services.answer_maker import (
+    answer_maker,
+)
+from app.services.base import (
+    fabric_subscriber,
+)
 class PriceChecker:
 
-    def __init__(self, bot: Bot, session: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(self, bot: Bot, session: AsyncSession) -> None:
         self.bot = bot
-        self.session = session()
+        self.session = session
         self.subscribe_repository = SubscriptionRepository(self.session)
         self.price_history_repository = PriceHistoryRepository(self.session)
         self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
@@ -95,7 +100,7 @@ class PriceChecker:
 
     def make_tasks(self, subscriptions: Sequence[Subscription]) -> list:
         return [
-            asyncio.create_task(fabric_parser(subscription.service_name, subscription).parse_to_thered())
+            asyncio.create_task(fabric_parser(subscription.service_name, subscription=subscription).parse_to_thered())
             for subscription in subscriptions
         ]
 
@@ -120,3 +125,20 @@ class PriceChecker:
             f"📉 Цена на {subscription.product.name} снизилась!\n"
             f"Было: {min_price}₽ → Стало: {new_price_history.price}₽",
         )
+
+    async def create_subscribe(self,message: types.Message, session: AsyncSession, service_name: str) -> None:
+
+        subsciber_class = fabric_subscriber(service_name)
+        subscriber = subsciber_class(message, session)
+        subscription = await subscriber.subscribe()
+
+        if not subscription:
+            await message.answer(answer_maker.error_subscribe())
+        else:
+            log.info(
+                "\nПодписался\n"
+                f"{service_name=}\n"
+                f"{subscription.product.name=}\n"
+                f"{subscription.product.price=}\n"
+            )
+            await message.answer(answer_maker.success_subscribe(subscription))
