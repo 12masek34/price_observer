@@ -2,6 +2,7 @@ import asyncio
 from decimal import (
     Decimal,
 )
+from string import whitespace
 from typing import (
     Sequence,
 )
@@ -9,6 +10,7 @@ from typing import (
 from aiogram import (
     Bot,
 )
+from pyvirtualdisplay.display import Display
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -42,34 +44,60 @@ class PriceChecker:
         self.session = session()
         self.subscribe_repository = SubscriptionRepository(self.session)
         self.price_history_repository = PriceHistoryRepository(self.session)
+        self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
 
     async def check_by_delay(self):
-        while True:
-            subscriptions = await self.get_subscriptions()
-            for subscription in subscriptions:
-                log.info(f"{subscription.id=} {subscription.service_name=} {subscription.product.name=}")
-                parser = fabric_parser(subscription.service_name, subscription.url)
-                product_data = await parser.parse()
+        self.display.start()
+        try:
+            while True:
+                await self.parse_subscriptions()
+                await asyncio.sleep(DELAY_BY_PRICE_CHECK)
+        finally:
+            self.display.stop()
 
-                if not product_data:
-                    log.error(
-                        f"Не удалось спарсить {subscription.id=} "
-                        f"{subscription.service_name=} {subscription.product.name=}"
-                    )
-                    continue
+    async def parse_subscriptions(self):
+        subscriptions = await self.get_subscriptions()
+        tasks = self.make_tasks(subscriptions)
 
-                log.info(f"{product_data.name=} {product_data.price}")
-                new_price_history = await self.price_history_repository.create(subscription, product_data.price)
+        for task in asyncio.as_completed(tasks):
+            product_data = await task
 
-                if not new_price_history:
-                    continue
+            if not product_data.name or not product_data.price:
+                log.error(
+                    f"\nНе удалось спарсить\n"
+                    f"{product_data.subscription.id=}\n"
+                    f"{product_data.subscription.service_name=}\n"
+                    f"{product_data.subscription.product.name=}\n"
+                )
+                continue
 
-                min_price = self.get_min_price(subscription)
+            log.info(
+                f"\nУспешно спарсил\n"
+                f"{product_data.subscription.id=}\n"
+                f"{product_data.subscription.service_name=}\n"
+                f"{product_data.name=}\n"
+                f"{product_data.price=}\n"
+            )
+            new_price_history = await self.price_history_repository.create(product_data.subscription, product_data.price)
 
-                if new_price_history.price < min_price:
-                    await self.notify_user(subscription, new_price_history, min_price)
+            if not new_price_history:
+                log.error(
+                    f"\nНе удалось сохранить\n"
+                    f"{product_data.name=}\n"
+                    f"{product_data.price=}\n"
+                )
+                continue
 
-            await asyncio.sleep(DELAY_BY_PRICE_CHECK)
+            min_price = self.get_min_price(product_data.subscription)
+
+            if new_price_history.price < min_price:
+                await self.notify_user(product_data.subscription, new_price_history, min_price)
+
+    def make_tasks(self, subscriptions: Sequence[Subscription]) -> list:
+        return [
+            asyncio.create_task(fabric_parser(subscription.service_name, subscription).parse_to_thered())
+            for subscription in subscriptions
+        ]
 
     async def get_subscriptions(self) -> Sequence[Subscription]:
         return await self.subscribe_repository.get_all_subscrptions()

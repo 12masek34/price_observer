@@ -1,15 +1,13 @@
+import asyncio
 import re
+
 from dataclasses import (
     dataclass,
 )
-from time import sleep
 
 from DrissionPage import (
     Chromium,
     ChromiumOptions,
-)
-from pyvirtualdisplay import (
-    Display,
 )
 
 from app.config.settings import (
@@ -17,12 +15,16 @@ from app.config.settings import (
     PARSE_TIMEOUT,
     log,
 )
+from app.database.models.subscription import (
+    Subscription,
+)
 
 
 @dataclass(frozen=True)
 class ProductData:
-    name: str
-    price: float
+    name: str | None
+    price: float | None
+    subscription: Subscription
 
 
 class BaseParser:
@@ -30,31 +32,32 @@ class BaseParser:
     price_product_xpath = None
     price_re = None
 
-    def __init__(self, url: str) -> None:
-        self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
-        self.url = url
+    def __init__(self, subscription) -> None:
+        self.subscription = subscription
         self.tab = None
         self.retries = PARSE_RETRIES
         self.timeout = PARSE_TIMEOUT
 
-    async def parse(self) -> ProductData | None:
-        self.display.start()
-        await self.init_tab()
+    async def parse_to_thered(self) -> ProductData:
+        return await asyncio.to_thread(self.parse)
+
+    def parse(self) -> ProductData:
+        self.init_tab()
         name = self.get_name()
 
         if not name:
-            return
+            return ProductData(name=None, price=None, subscription=self.subscription)
 
         price = self.get_price()
 
         if not price:
-            return
+            return ProductData(name=None, price=None, subscription=self.subscription)
 
-        self.display.stop()
+        self.tab.close()
 
-        return ProductData(name=name, price=float(price))
+        return ProductData(name=name, price=float(price), subscription=self.subscription)
 
-    async def init_tab(self) -> bool | None:
+    def init_tab(self) -> bool | None:
 
         co = ChromiumOptions()
         co.headless(False)
@@ -86,11 +89,10 @@ class BaseParser:
         co.set_argument("--disable-features=IsolateOrigins,site-per-process")
         co.set_argument("--disable-session-crashed-bubble")
         co.set_argument("--disable-search-engine-choice-screen")
-        self.tab = Chromium(co).latest_tab
+        self.tab = Chromium(co).new_tab(url=self.subscription.url)
         self.run_js()
-        self.connect()
 
-    def run_js(self):
+    def run_js(self) -> None:
         for _ in range(self.retries):
             try:
                 self.tab.run_js("""
@@ -138,25 +140,19 @@ class BaseParser:
             else:
                 return
 
-    def connect(self) -> None:
-        self.tab.get(self.url, retry=self.retries, timeout=self.timeout)
-
     def get_elem_by_xpath(self, xpaths: str, pattern: str | None = None) -> str:
 
         for _ in range(self.retries):
             for xpath in xpaths:
                 try:
-                    sleep(2)
                     tag = self.tab.ele(xpath, timeout=self.timeout)
                 except Exception:
                     log.error(f"Ошибка при парсинге html")
-                    # self.connect()
                     self.tab.refresh()
                     continue
 
                 if not tag:
-                    log.info(f"не найден {xpath}")
-                    # self.connect()
+                    log.info(f"\nНе найден\n{xpath=}")
                     self.tab.refresh()
                     continue
 
