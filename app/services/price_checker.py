@@ -113,6 +113,7 @@ class PriceChecker:
                 f"{product_data.name=}\n"
                 f"{product_data.price=}\n"
             )
+            min_price = self.get_min_price(product_data.subscription)
             new_price_history = await self.price_history_repository.create(product_data.subscription, product_data.price)
 
             if not new_price_history:
@@ -122,8 +123,6 @@ class PriceChecker:
                     f"{product_data.price=}\n"
                 )
                 continue
-
-            min_price = self.get_min_price(product_data.subscription)
 
             if new_price_history.price < min_price:
                 await self.notify_user(product_data.subscription, new_price_history, min_price)
