@@ -140,7 +140,7 @@ class PriceChecker:
         return await self.subscribe_repository.get_all_subscrptions()
 
     def get_min_price(self, subscription: Subscription) -> Decimal:
-        prices = [price_history. price for price_history in subscription.price_history]
+        prices = [price_history.price for price_history in subscription.price_history]
         prices.append(subscription.product.price)
 
         return min(prices)
