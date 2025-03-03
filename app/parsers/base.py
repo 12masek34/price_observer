@@ -32,7 +32,7 @@ class BaseParser:
     name_product_xpath = None
     price_product_xpath = None
     price_re = None
-    _semaphore = asyncio.Semaphore(multiprocessing.cpu_count() * 2)
+    _semaphore = asyncio.Semaphore(multiprocessing.cpu_count())
 
     def __init__(self, subscription: Subscription | None = None, url: str | None = None) -> None:
         self.subscription = subscription
