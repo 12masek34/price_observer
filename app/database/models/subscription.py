@@ -3,6 +3,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    text,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -39,3 +40,4 @@ class Subscription(MyBase):
         passive_deletes=True,
         order_by="PriceHistory.id"
     )
+    parse_error_count = Column(Integer, server_default=text("0"), nullable=False)
