@@ -14,9 +14,6 @@ from aiogram import (
     Bot,
     types,
 )
-from pyvirtualdisplay.display import (
-    Display,
-)
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
@@ -56,20 +53,18 @@ class PriceChecker:
         self.session = session
         self.subscribe_repository = SubscriptionRepository(self.session)
         self.price_history_repository = PriceHistoryRepository(self.session)
-        self.display = Display(visible=False, size=(1920, 1080), backend="xvfb")
 
     async def check_by_delay(self) -> None:
-        self.display.start()
         start_time = datetime.now()
         while True:
-            interval = datetime.now() - start_time
+            try:
+                interval = datetime.now() - start_time
 
-            if interval.total_seconds() > DELAY_BY_PRICE_CHECK:
-                start_time = datetime.now()
-                subscriptions = await self.get_subscriptions()
-                log.info(f"========start parsing count={len(subscriptions)}==========")
-                tasks = self.make_tasks(subscriptions)
-                try:
+                if interval.total_seconds() > DELAY_BY_PRICE_CHECK:
+                    start_time = datetime.now()
+                    subscriptions = await self.get_subscriptions()
+                    log.info(f"========start parsing count={len(subscriptions)}==========")
+                    tasks = self.make_tasks(subscriptions)
                     error_subscriptions = await self.parse_subscriptions(tasks)
 
                     if error_subscriptions:
@@ -82,7 +77,6 @@ class PriceChecker:
                             self.error_log(error_subscriptions)
                             await asyncio.sleep(90)
                             error_subscriptions = await self.parse_subscriptions(tasks)
-
                             log.error(
                                 "\n".join(
                                     [
@@ -91,9 +85,15 @@ class PriceChecker:
                                     ]
                                 )
                             )
-                finally:
-                    self.display.stop()
-                log.info(f"========end parsing errors count={len(error_subscriptions)}==========")
+                            error_subscriptions = await self.subscribe_repository.increment_error_count(
+                                error_subscriptions,
+                            )
+                            await self.notify_user_error(error_subscriptions)
+                            await self.subscribe_repository.reset_error_count(error_subscriptions)
+                    log.info(f"========end parsing errors count={len(error_subscriptions)}==========")
+
+            except Exception:
+                continue
 
             await asyncio.sleep(10)
 
@@ -125,7 +125,7 @@ class PriceChecker:
                 continue
 
             if new_price_history.price < min_price:
-                await self.notify_user(product_data.subscription, new_price_history, min_price)
+                await self.notify_user_price_low(product_data.subscription, new_price_history, min_price)
 
         return error_subscriptions
 
@@ -144,7 +144,7 @@ class PriceChecker:
 
         return min(prices)
 
-    async def notify_user(
+    async def notify_user_price_low(
         self,
         subscription: Subscription,
         new_price_history: PriceHistory,
@@ -156,6 +156,16 @@ class PriceChecker:
             f"📉 Цена на {subscription.product.name} снизилась!\n"
             f"Было: {min_price}₽ → Стало: {new_price_history.price}₽",
         )
+
+    async def notify_user_error(self, subscriptions: list[Subscription]) -> None:
+        for subscription in subscriptions:
+            await self.bot.send_message(
+                subscription.chat_id,
+                f"Какие-то проблемы с подпиской на {subscription.service_name}:\n"
+                f"<a href='{subscription.url}'>{subscription.product.name}</a>\n"
+                f"<b>Возможно товар сняли с продажи!</b> Не забудь удалить подписку если она уже не актуальна.",
+                parse_mode="HTML",
+            )
 
     async def create_subscribe(self,message: types.Message, session: AsyncSession, service_name: str) -> None:
 

@@ -8,6 +8,9 @@ from aiogram import (
 from aiogram.fsm.storage.memory import (
     MemoryStorage,
 )
+from pyvirtualdisplay.display import (
+    Display,
+)
 
 from app.config.settings import (
     log,
@@ -44,6 +47,8 @@ def run_price_checker() -> None:
 
 
 async def main() -> None:
+    display = Display(visible=False, size=(1920, 1080), backend="xvfb")
+    display.start()
     bot = Bot(token=settings.bot_token)
     dp.include_router(commands.router)
     dp.include_router(ozon.router)
@@ -56,6 +61,7 @@ async def main() -> None:
     process = multiprocessing.Process(target=run_price_checker, daemon=True)
     process.start()
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+    display.stop()
 
 
 if __name__ == "__main__":

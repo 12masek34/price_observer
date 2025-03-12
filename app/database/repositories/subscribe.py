@@ -9,12 +9,11 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from app.config.settings import (
+    MAX_PARSE_ERROR_COUNT,
+)
 from app.database.models.subscription import (
     Subscription,
-)
-
-from app.database.models.price_history import (
-    PriceHistory,
 )
 from app.database.repositories.base import (
     BaseRepository,
@@ -71,3 +70,17 @@ class SubscriptionRepository(BaseRepository):
 
     async def get_subscription_by_id(self, subscription_id: int) -> Subscription:
         return await self.session.get_one(Subscription, subscription_id)
+
+    async def increment_error_count(self, subscriptions: list[Subscription]) -> list[Subscription]:
+        for subscription in subscriptions:
+            subscription.parse_error_count += 1
+
+        await self.session.commit()
+
+        return [subscription for subscription in subscriptions if subscription.parse_error_count >= MAX_PARSE_ERROR_COUNT]
+
+    async def reset_error_count(self, subscriptions: list[Subscription]) -> None:
+        for subscription in subscriptions:
+            subscription.parse_error_count = 0
+
+        await self.session.commit()
